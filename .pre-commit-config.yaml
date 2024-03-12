@@ -1,0 +1,17 @@
+﻿# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/psf/black
+    rev: ''
+    hooks:
+      - id: black
+        language_version: python3.10 
+  - repo: https://github.com/PyCQA/flake8
+    rev: ''
+    hooks:
+      - id: flake8
+        args: [--max-line-length=120]
+  - repo: https://github.com/PyCQA/isort
+    rev: ''
+    hooks:
+      - id: isort
