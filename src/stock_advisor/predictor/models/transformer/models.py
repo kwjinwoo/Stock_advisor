@@ -18,15 +18,7 @@ class TransformerConfig:
     activation: str = "relu"
     layer_norm_eps: float = 1e-5
     norm_first: bool = True
-    bias = False
-
-
-class PredictorMaker:
-    """Create stock nn.Module predictor"""
-
-    @staticmethod
-    def make_transforemr():
-        pass
+    bias: bool = False
 
 
 class TransformerPredictor(nn.Module):
@@ -61,9 +53,7 @@ class TransformerPredictor(nn.Module):
             norm_first=self.config.norm_first,
             bias=self.config.bias,
         )
-        encoders = nn.TransformerEncoder(
-            encoder_layer=encoder_layer, num_layers=self.config.num_encoder_layers
-        )
+        encoders = nn.TransformerEncoder(encoder_layer=encoder_layer, num_layers=self.config.num_encoder_layers)
         return encoders
 
     def make_decoders(self) -> nn.TransformerDecoder:
@@ -83,14 +73,10 @@ class TransformerPredictor(nn.Module):
             norm_first=self.config.norm_first,
             bias=self.config.bias,
         )
-        decoders = nn.TransformerDecoder(
-            decoder_layer=decoder_layer, num_layers=self.config.num_decoder_layers
-        )
+        decoders = nn.TransformerDecoder(decoder_layer=decoder_layer, num_layers=self.config.num_decoder_layers)
         return decoders
 
-    def forward(
-        self, inputs: torch.Tensor, decoder_input: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, decoder_input: Optional[torch.Tensor] = None) -> torch.Tensor:
         """forward. if decoder_input is None, encoder output's last value is passed to decoder's tgt.
         except when decoder_input len is one, always causal mask is applied
 
@@ -111,9 +97,7 @@ class TransformerPredictor(nn.Module):
             decoder_input = self.embed(decoder_input)
 
         if decoder_input.shape[1] > 1:
-            mask = nn.Transformer.generate_square_subsequent_mask(
-                decoder_input.shape[1]
-            )
+            mask = nn.Transformer.generate_square_subsequent_mask(decoder_input.shape[1])
         else:
             mask = None
 

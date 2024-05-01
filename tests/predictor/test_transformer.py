@@ -3,7 +3,7 @@ from typing import Optional
 import pytest
 import torch
 
-from stock_advisor.predictor.models.transformer.models import TransformerConfig, TransformerPredictor
+from stock_advisor.predictor.models import TransformerConfig, TransformerPredictor
 
 
 class TestTransformerPredictor:
