@@ -3,7 +3,7 @@ from typing import Optional
 import pytest
 import torch
 
-from stock_advisor.predictor.models import TransformerConfig, TransformerPredictor
+from stock_advisor.predictor.models.transformer.models import TransformerConfig, TransformerPredictor
 
 
 class TestTransformerPredictor:
@@ -38,9 +38,7 @@ class TestTransformerPredictor:
             [torch.randn(1, 15, 1), None],
         ),
     )
-    def test_forward(
-        self, encoder_input: torch.Tensor, decoder_input: Optional[torch.Tensor]
-    ) -> None:
+    def test_forward(self, encoder_input: torch.Tensor, decoder_input: Optional[torch.Tensor]) -> None:
         """forward test"""
         out = self.transformer(encoder_input, decoder_input)
 
