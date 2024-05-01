@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -21,7 +22,7 @@ class TransformerConfig:
 
 
 class PredictorMaker:
-    """Create stock predict model nn.Module"""
+    """Create stock nn.Module predictor"""
 
     @staticmethod
     def make_transforemr():
@@ -32,6 +33,11 @@ class TransformerPredictor(nn.Module):
     """Transformer block based predictor"""
 
     def __init__(self, config: TransformerConfig, **kwargs) -> None:
+        """init TransformerPredictor
+
+        Args:
+            config (TransformerConfig): Transformer config
+        """
         super().__init__(**kwargs)
         self.config = config
         self.embed = nn.Linear(in_features=1, out_features=config.d_model)
@@ -39,6 +45,11 @@ class TransformerPredictor(nn.Module):
         self.decoders = self.make_decoders()
 
     def make_encoders(self) -> nn.TransformerEncoder:
+        """make encoder layers
+
+        Returns:
+            nn.TransformerEncoder: encoder layers
+        """
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=self.config.d_model,
             nhead=self.config.nhead,
@@ -56,6 +67,11 @@ class TransformerPredictor(nn.Module):
         return encoders
 
     def make_decoders(self) -> nn.TransformerDecoder:
+        """make decoder layers
+
+        Returns:
+            nn.TransformerDecoder: decoder layers
+        """
         decoder_layer = nn.TransformerDecoderLayer(
             d_model=self.config.d_model,
             nhead=self.config.nhead,
@@ -72,18 +88,34 @@ class TransformerPredictor(nn.Module):
         )
         return decoders
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.embed(x)
-        x = self.encoders(x)
-        # TODO(kwjinwoo): studying about decoder forward and encoder output.
-        # out = self.decoders()
-        return x
+    def forward(
+        self, inputs: torch.Tensor, decoder_input: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
+        """forward. if decoder_input is None, encoder output's last value is passed to decoder's tgt.
+        except when decoder_input len is one, always causal mask is applied
 
+        Args:
+            inputs (torch.Tensor): input data
+            decoder_input (Optional[torch.Tensor], optional): decoder input data. Defaults to None.
 
-if __name__ == "__main__":
-    config = TransformerConfig()
-    m = TransformerPredictor(config)
+        Returns:
+            torch.Tensor: predict values.
+        """
+        encoder_input = self.embed(inputs)
+        encoder_output = self.encoders(encoder_input)
 
-    random_input = torch.randn(1, 15, 1)
-    out = m(random_input)
-    print(out.shape)
+        if decoder_input is None:
+            decoder_input = encoder_output[..., [-1], :]
+            encoder_output = encoder_output[..., :-1, :]
+        else:
+            decoder_input = self.embed(decoder_input)
+
+        if decoder_input.shape[1] > 1:
+            mask = nn.Transformer.generate_square_subsequent_mask(
+                decoder_input.shape[1]
+            )
+        else:
+            mask = None
+
+        out = self.decoders(tgt=decoder_input, memory=encoder_input, tgt_mask=mask)
+        return out
