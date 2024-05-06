@@ -23,3 +23,12 @@ def transformer_config_path(tmp_path: Path) -> str:
     with open(save_path, "w") as f:
         json.dump(temp_config, f)
     return save_path
+
+
+@pytest.fixture
+def data_config_path(tmp_path: Path) -> str:
+    temp_config = {"max_len": 14}
+    save_path = tmp_path / "data.json"
+    with open(save_path, "w") as f:
+        json.dump(temp_config, f)
+    return save_path

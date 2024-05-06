@@ -1,8 +1,11 @@
+import math
 from dataclasses import dataclass
 from typing import Optional
 
 import torch
 import torch.nn as nn
+
+from stock_advisor.predictor.configs import DataConfig
 
 
 @dataclass
@@ -21,18 +24,53 @@ class TransformerConfig:
     bias: bool = False
 
 
+class PositionalEmbedding(nn.Module):
+    """Postional Embedding module class"""
+
+    def __init__(self, data_config: DataConfig, model_config: TransformerConfig, **kwargs) -> None:
+        """init Postional Embedding
+
+        Args:
+            data_config (DataConfig): data config
+            model_config (TransformerConfig): model config
+        """
+        super().__init__(**kwargs)
+        self.max_len = data_config.max_len
+        self.d_model = model_config.d_model
+        self.position = torch.arange(self.max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, self.d_model, 2) * (-math.log(10000.0) / self.d_model))
+        pe = torch.zeros(1, self.max_len, self.d_model)
+        pe[..., 0::2] = torch.sin(self.position * div_term)
+        pe[..., 1::2] = torch.cos(self.position * div_term)
+        self.register_buffer("pe", pe)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """forwarding positional embedding. add position value to embedding vector.
+
+        Args:
+            x (torch.Tensor): embedding vector.
+
+        Returns:
+            torch.Tensor: embedding vector to be added postion info.
+        """
+        x = x + self.pe[:, : x.size(1)]
+        return x
+
+
 class TransformerPredictor(nn.Module):
     """Transformer block based predictor"""
 
-    def __init__(self, config: TransformerConfig, **kwargs) -> None:
+    def __init__(self, data_config: DataConfig, model_config: TransformerConfig, **kwargs) -> None:
         """init TransformerPredictor
 
         Args:
-            config (TransformerConfig): Transformer config
+            data_config(DataConfig): Data config
+            model_config (TransformerConfig): Transformer config
         """
         super().__init__(**kwargs)
-        self.config = config
-        self.embed = nn.Linear(in_features=1, out_features=config.d_model)
+        self.config = model_config
+        self.pe = PositionalEmbedding(data_config=data_config, model_config=model_config)
+        self.embed = nn.Linear(in_features=1, out_features=model_config.d_model)
         self.encoders = self.make_encoders()
         self.decoders = self.make_decoders()
 
@@ -88,6 +126,7 @@ class TransformerPredictor(nn.Module):
             torch.Tensor: predict values.
         """
         encoder_input = self.embed(inputs)
+        encoder_input = self.pe(encoder_input)
         encoder_output = self.encoders(encoder_input)
 
         if decoder_input is None:
@@ -100,6 +139,6 @@ class TransformerPredictor(nn.Module):
             mask = nn.Transformer.generate_square_subsequent_mask(decoder_input.shape[1])
         else:
             mask = None
-
+        decoder_input = self.pe(decoder_input)
         out = self.decoders(tgt=decoder_input, memory=encoder_input, tgt_mask=mask)
         return out
