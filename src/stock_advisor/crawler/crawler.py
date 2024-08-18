@@ -29,9 +29,7 @@ class Crawler:
         """
         return cls(symbol)
 
-    def get_stock_data(
-        self, start_date: str, end_date: Optional[str] = None
-    ) -> pd.DataFrame:
+    def get_stock_data(self, start_date: str, end_date: Optional[str] = None) -> pd.DataFrame:
         """get stock data from saved stock of symbol.
         from start_date to end_date, get stock data.
 
@@ -41,14 +39,10 @@ class Crawler:
         Returns:
             pd.DataFrame: stock data.
         """
-        data = fdr.DataReader(
-            self.symbol, start_date, self.end_date if end_date is None else end_date
-        )
+        data = fdr.DataReader(self.symbol, start_date, self.end_date if end_date is None else end_date)
         return data
 
-    def get_exchange_rate(
-        self, currency_symbol: str, start_date: str, end_date: Optional[str] = None
-    ):
+    def get_exchange_rate(self, currency_symbol: str, start_date: str, end_date: Optional[str] = None) -> pd.DataFrame:
         """get exchange rate from currency_symbol.
         from start_date to end_date, get exchange rate of currency_symbol.
 
@@ -86,9 +80,7 @@ class Crawler:
         else:
             return None
 
-    def calculate_return(
-        self, start_date: str, end_date: Optional[str] = None
-    ) -> float:
+    def calculate_return(self, start_date: str, end_date: Optional[str] = None) -> float:
         """from star_date to end_date, calculate return.
 
         Args:
@@ -104,9 +96,7 @@ class Crawler:
         print(f"The return rate from {start_date} to {end_date} is {return_rate:.2f}%")
         return return_rate
 
-    def calculate_correlation(
-        self, other_symbol: str, start_date: str, end_date: Optional[str] = None
-    ) -> float:
+    def calculate_correlation(self, other_symbol: str, start_date: str, end_date: Optional[str] = None) -> float:
         """calcuate correlation between object's symbol and other symbol.
 
         Args:
