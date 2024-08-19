@@ -36,6 +36,7 @@ class Crawler:
         Args:
             start_date (str): start date ('YYYY-MM-DD')
             end_date (Optional[torch.Tensor], optional): end date ('YYYY-MM-DD')
+
         Returns:
             pd.DataFrame: stock data.
         """
@@ -50,6 +51,7 @@ class Crawler:
             currency_symbol (str): currency exchange symbol (e.g. 'USD/KRW')
             start_date (str): start date ('YYYY-MM-DD')
             end_date (Optional[torch.Tensor], optional): end date ('YYYY-MM-DD')
+
         Returns:
             pd.DataFrame : exchange raet data.
         """
@@ -65,6 +67,7 @@ class Crawler:
 
         Args:
             date (str): date to search. ('YYYY-MM-DD')
+
         Returns:
             Optional[pd.Series]: data of input date. if cannot get data, return None.
         """
@@ -86,6 +89,7 @@ class Crawler:
         Args:
             start_date (str): starte date.
             end_date (Optional[torch.Tensor], optional): end date.
+
         Returns:
             float : calcuated return.
         """
@@ -103,6 +107,7 @@ class Crawler:
             other_symbol (str): symbol of compared stock.
             start_date (str): start date.
             end_date (Optional[torch.Tensor], optional): end date.
+
         Returns:
             float : correlation value.
         """
@@ -138,6 +143,7 @@ class Crawler:
 
         Args:
             market (str): market symbol.(e.g. 'KRX', 'NASDAQ', 'NYSE', 'S&P500'). Defaults to 'KRX'.
+
         Returns:
             pd.DataFrame : market stock list.
         """
