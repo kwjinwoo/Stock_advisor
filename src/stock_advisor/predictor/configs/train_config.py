@@ -8,6 +8,7 @@ class TrainConfig:
 
     batch_size: int = 4
     num_epochs: int = 100
+    loss_fn: str = "MAE"
     optimizer: str = "Adam"
     lr: float = 1e-5
 
